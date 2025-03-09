@@ -3,52 +3,75 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Post;
+use App\Models\User;
 
 class PostController extends Controller
 {
     public function index()
     {
-        $posts = [
-            ['id' => 1, 'title' => 'laravel', 'posted_by' => 'rawan', 'created_at' => '2025-03-08 12:47:00'],
-            ['id' => 2, 'title' => 'HTML', 'posted_by' => 'ali', 'created_at' => '2025-04-10 11:00:00'],
-        ];
+        $posts = Post::paginate(10);
+        return view('posts.index', compact('posts'));
 
-        return view('posts.index',['posts' => $posts]);
+        // return view('posts.index',['posts' => $posts]);
     }
-
-    public function show($id)
-    {
-        $post = [
-            'id' => 1, 
-            'title' => 'laravel',
-            'description' => 'some description',
-            'posted_by' => [
-                'name' => 'rawan',
-                'email' => 'rawan@gmail.com',
-                'created_at' => 'Thursday 25th of December 1975 02:15:16 PM'
-            ],
-            'created_at' => '2025-03-08 12:47:00',
-        ];
-        return view('posts.show', ['post' => $post]);
-    }
-
     public function create()
     {
-        return view('posts.create');
-    }
+        $users = User::all();
 
-    public function store()
+        return view('posts.create', ['users' => $users]);
+    }
+    public function show($id)
     {
-        $title = request()->title;
-        $description = request()->description;
-        return to_route('posts.show', 1);
-        // return to_route('posts.index');
+        $post = Post::find($id);
+    
+        if (!$post) {
+            return redirect()->route('posts.index')->with('error', 'Post not found.');
+        }
+    
+        return view('posts.show', ['post' => $post]);
     }
-    public function edit($id){
-        return view('posts.edit');
+    
+    public function edit(Post $post)
+    {
+    $users = User::all();
+    return view('posts.edit', compact('post', 'users'));
     }
 
-    public function update($id){
-        return to_route('posts.show',1);
+    
+    public function update(Request $request, Post $post)
+    {
+        // dd($request->all());
+    $post->update([
+        'title' => $request->title,
+        'description' => $request->description,
+        'user_id' => $request->user_id,
+    ]);
+
+    return redirect()->route('posts.index')->with('success', 'Post updated successfully!');
     }
+
+    public function store(Request $request){
+    Post::create([
+        'title' => $request->title,
+        'description' => $request->description,
+        'user_id' => $request->user_id, 
+    ]);
+    // return to_route('posts.show', $post->id);
+    // return to_route('posts.index');
+    return redirect()->route('posts.index')->with('success', 'Post created successfully!');
+    }
+
+    public function destroy($id)
+    {
+        $post = Post::find($id);
+        if (!$post) {
+            return redirect()->route('posts.index')->with('error', 'Post not found.');
+        }
+    
+        $post->delete();
+        return redirect()->route('posts.index')->with('success', 'Post deleted successfully.');
+    }
+    
+
 }
