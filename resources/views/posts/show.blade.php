@@ -70,6 +70,46 @@
                     </div>
                 </div>
             </div>
+            <div class="mt-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Comments</h2>
+            
+                <!-- Add Comment Form -->
+                <form action="{{ route('comments.store', $post) }}" method="POST" class="mb-6">
+                    @csrf
+                    <textarea 
+                        name="body" 
+                        required 
+                        class="w-full p-3 border rounded-lg focus:ring focus:ring-blue-300"
+                        placeholder="Write a comment..."
+                    ></textarea>
+                    <button 
+                        type="submit" 
+                        class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    >
+                        Add Comment
+                    </button>
+                </form>
+            
+                <!-- Comments List -->
+                <div class="space-y-4">
+                    @foreach ($post->comments as $comment)
+                        <div class="p-4 bg-white rounded-lg shadow-md">
+                            <p class="text-gray-700">{{ $comment->body }}</p>
+            
+                            <form action="{{ route('comments.destroy', $comment) }}" method="POST" class="mt-2">
+                                @csrf
+                                @method('DELETE')
+                                <button 
+                                    type="submit" 
+                                    class="text-sm text-red-600 hover:underline"
+                                >
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
            <!-- Back Button -->
            <div class="flex justify-end">
             <a href="{{ route('posts.index') }}" class="px-4 py-2 bg-gray-600 text-white font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
