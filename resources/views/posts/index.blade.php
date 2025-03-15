@@ -1,107 +1,121 @@
 <x-layout>
     <div class="text-center">
-        <a href="{{ route('posts.create') }}" class="mt-4 px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+        <a href="{{ route('posts.create') }}" 
+            class="mt-4 px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700">
             Create Post
         </a>
     </div>
 
-    <!-- Table Component -->
-    <div class="mt-6 rounded-lg border border-gray-200">
-        <div class="overflow-x-auto rounded-t-lg">
-            <table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
-                <thead class="text-left">
-                    <tr>
-                        <th class="px-4 py-2 font-medium whitespace-nowrap text-gray-900">#</th>
-                        <th class="px-4 py-2 font-medium whitespace-nowrap text-gray-900">Title</th>
-                        <th class="px-4 py-2 font-medium whitespace-nowrap text-gray-900">Posted By</th>
-                        <th class="px-4 py-2 font-medium whitespace-nowrap text-gray-900">Created At</th>
-                        <th class="px-4 py-2 font-medium whitespace-nowrap text-gray-900">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    @foreach ($posts as $post)
-                    <tr>
-                        <td class="px-4 py-2 font-medium whitespace-nowrap text-gray-900">{{ $post->id }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-gray-700">{{$post->title}}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-gray-700">{{ $post->user ? $post->user->name : 'No User Found' }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-gray-700">{{ $post->formatted_date }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-gray-700 space-x-2">
-                            <a href="{{ route('posts.show', $post->id) }}" class="inline-block px-4 py-1 text-xs font-medium text-white bg-blue-400 rounded hover:bg-blue-500">View</a>
-                            <a href="{{ route('posts.edit', $post->id) }}" 
-                                class="inline-block px-4 py-1 text-xs font-medium text-white bg-yellow-600 rounded hover:bg-yellow-700">
-                                Edit
-                             </a>                             
+    <!-- Vue App Wrapper -->
+    <div id="app"> 
+      <!-- Table Component -->
+<div class="mt-6 rounded-lg border border-gray-200 shadow-md bg-white p-4">
+    <div class="overflow-x-auto rounded-t-lg">
+        <table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
+            <thead class="text-left bg-gray-100">
+                <tr>
+                    <th class="px-4 py-2 font-medium text-gray-900">#</th>
+                    <th class="px-4 py-2 font-medium text-gray-900">Title</th>
+                    <th class="px-4 py-2 font-medium text-gray-900">Posted By</th>
+                    <th class="px-4 py-2 font-medium text-gray-900">Created At</th>
+                    <th class="px-4 py-2 font-medium text-gray-900">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @foreach ($posts as $post)
+                <tr class="{{ $post->deleted_at ? 'bg-red-100' : '' }}">
+                    <td class="px-4 py-2 font-medium text-gray-900">{{ $post->id }}</td>
+                    <td class="px-4 py-2 text-gray-700">{{ $post->title }}</td>
+                    <td class="px-4 py-2 text-gray-700">{{ $post->user ? $post->user->name : 'No User Found' }}</td>
+                    <td class="px-4 py-2 text-gray-700">{{ $post->formatted_date }}</td>
+                    <td class="px-4 py-2 text-gray-700 space-x-2 flex items-center">
+                        <!-- Show Button -->
+                        <a href="{{ route('posts.show', $post->id) }}" class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600">
+                            Show
+                        </a>
+                        <!-- View Button (Vue Modal) -->
+                        <post-modal :post-id="{{ $post->id }}"></post-modal>
+                        <!-- Edit Button -->
+                        <a href="{{ route('posts.edit', $post->id) }}" class="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600">
+                            Edit
+                        </a>
+                        @if ($post->deleted_at)
+                            <!-- Restore Button -->
+                            <form action="{{ route('posts.restore', $post->id) }}" method="POST" class="inline">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit" class="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600">
+                                    Restore
+                                </button>
+                            </form>
+                        @else
+                            <!-- Delete Button -->
                             <form action="{{ route('posts.destroy', $post->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="px-4 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700" onclick="return confirm('Are you sure?')">
+                                <button type="submit" class="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600">
                                     Delete
                                 </button>
                             </form>
-                        </td>
-                    </tr>
+                        @endif
+                    </td>
+                </tr>
                 @endforeach
-                </tbody>
-            </table>
-        </div>
+            </tbody>
+        </table>
+    </div>
 
-      <!-- Custom Pagination -->
-<div class="rounded-b-lg border-t border-gray-200 px-4 py-2">
-    <ol class="flex justify-end gap-1 text-xs font-medium">
-        {{-- Previous Page --}}
-        @if ($posts->onFirstPage())
-            <li class="inline-flex size-8 items-center justify-center rounded-sm border border-gray-100 bg-gray-200 text-gray-500 cursor-not-allowed">
-                <span class="sr-only">Prev Page</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-            </li>
-        @else
-            <li>
-                <a href="{{ $posts->previousPageUrl() }}" class="inline-flex size-8 items-center justify-center rounded-sm border border-gray-100 bg-white text-gray-900 hover:bg-gray-200">
-                    <span class="sr-only">Prev Page</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                </a>
-            </li>
-        @endif
-
-        {{-- Page Numbers --}}
-        @foreach ($posts->links()->elements[0] as $page => $url)
-            @if ($page == $posts->currentPage())
-                <li class="block size-8 rounded-sm border-blue-600 bg-blue-600 text-center leading-8 text-white font-bold">
-                    {{ $page }}
-                </li>
+    <!-- Pagination (Centered & Inside Table Container) -->
+    <div class="mt-6 flex flex-col items-center justify-center p-4 rounded-lg border-t border-gray-200">
+        <!-- Navigation Buttons -->
+        <div class="inline-flex space-x-2">
+            {{-- Previous Page --}}
+            @if ($posts->onFirstPage())
+                <span class="px-3 py-2 text-gray-400 bg-gray-200 rounded-md cursor-not-allowed">
+                    Prev
+                </span>
             @else
-                <li>
-                    <a href="{{ $url }}" class="block size-8 rounded-sm border border-gray-100 bg-white text-center leading-8 text-gray-900 hover:bg-gray-200">
-                        {{ $page }}
-                    </a>
-                </li>
-            @endif
-        @endforeach
-
-        {{-- Next Page --}}
-        @if ($posts->hasMorePages())
-            <li>
-                <a href="{{ $posts->nextPageUrl() }}" class="inline-flex size-8 items-center justify-center rounded-sm border border-gray-100 bg-white text-gray-900 hover:bg-gray-200">
-                    <span class="sr-only">Next Page</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4-4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                    </svg>
+                <a href="{{ $posts->previousPageUrl() }}" class="px-3 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                    Prev
                 </a>
-            </li>
-        @else
-            <li class="inline-flex size-8 items-center justify-center rounded-sm border border-gray-100 bg-gray-200 text-gray-500 cursor-not-allowed">
-                <span class="sr-only">Next Page</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-            </li>
-        @endif
-    </ol>
+            @endif
+
+            {{-- Page Numbers --}}
+            @php
+                $totalPages = $posts->lastPage();
+                $currentPage = $posts->currentPage();
+                $pageGroup = ceil($currentPage / 10); // Group pages in sets of 10
+                $startPage = ($pageGroup - 1) * 10 + 1;
+                $endPage = min($startPage + 9, $totalPages);
+            @endphp
+
+            @for ($i = $startPage; $i <= $endPage; $i++)
+                @if ($i == $currentPage)
+                    <span class="px-3 py-2 font-bold text-white bg-blue-400 rounded-md">
+                        {{ $i }}
+                    </span>
+                @else
+                    <a href="{{ $posts->url($i) }}" class="px-3 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                        {{ $i }}
+                    </a>
+                @endif
+            @endfor
+
+            {{-- Next Page --}}
+            @if ($posts->hasMorePages())
+                <a href="{{ $posts->nextPageUrl() }}" class="px-3 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                    Next
+                </a>
+            @else
+                <span class="px-3 py-2 text-gray-400 bg-gray-200 rounded-md cursor-not-allowed">
+                    Next
+                </span>
+            @endif
+        </div>
     </div>
-    </div>
-    
-</x-layout> 
+</div> <!-- End Table Component -->
+
+    </div> <!-- End Vue App Wrapper -->
+
+    @vite(['resources/js/app.js'])
+</x-layout>
