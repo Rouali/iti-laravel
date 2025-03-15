@@ -1,157 +1,25 @@
-<template>
-  <AppLayout>
-    <!-- Create Post Button -->
-    <div class="text-center">
-        <Link 
-        href="/posts/create"
-      class="mt-4 px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition"
-    >
-      Create Post
-    </Link>
-    </div>
-
-    <!-- Posts Table -->
-    <div class="mt-6 rounded-lg border border-gray-200 shadow-md bg-white p-4">
-      <div class="overflow-x-auto rounded-t-lg">
-        <table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
-          <thead class="text-left bg-gray-100">
-            <tr>
-              <th class="px-4 py-2 font-medium text-gray-900">#</th>
-              <th class="px-4 py-2 font-medium text-gray-900">Title</th>
-              <th class="px-4 py-2 font-medium text-gray-900">Posted By</th>
-              <th class="px-4 py-2 font-medium text-gray-900">Created At</th>
-              <th class="px-4 py-2 font-medium text-gray-900">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="post in posts.data" :key="post.id" :class="post.deleted_at ? 'bg-red-100' : ''">
-              <td class="px-4 py-2 font-medium text-gray-900">{{ post.id }}</td>
-              <td class="px-4 py-2 text-gray-700">{{ post.title }}</td>
-              <td class="px-4 py-2 text-gray-700">{{ post.user ? post.user.name : 'No User Found' }}</td>
-              <td class="px-4 py-2 text-gray-700">{{ post.formatted_date }}</td>
-              <td class="px-4 py-2 text-gray-700 space-x-2 flex items-center">
-                <!-- Show Button -->
-                <Link 
-                  :href="`/posts/${post.id}`" 
-                  class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition"
-                >
-                  Show
-                </Link>
-                
-                <!-- View Button (Ajax Modal) -->
-                <ViewPostButton :postId="post.id" />
-                
-                <!-- Edit Button -->
-                <Link 
-                  :href="`/posts/${post.id}/edit`" 
-                  class="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 transition"
-                >
-                  Edit
-                </Link>
-                
-                <!-- Restore/Delete Button -->
-                <button 
-                  v-if="post.deleted_at" 
-                  @click="restorePost(post.id)" 
-                  class="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition"
-                >
-                  Restore
-                </button>
-                <button 
-                  v-else 
-                  @click="deletePost(post.id)" 
-                  class="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-     <!-- Pagination -->
-<div class="mt-6 flex justify-center p-4 border-t border-gray-200">
-  <div class="flex items-center space-x-1 overflow-x-auto">
-    
-    <!-- Previous Page -->
-    <Link 
-      v-if="posts.prev_page_url" 
-      :href="posts.prev_page_url" 
-      class="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition"
-    >
-      Prev
-    </Link>
-    <span 
-      v-else 
-      class="px-4 py-2 text-gray-400 bg-gray-100 rounded-md cursor-not-allowed"
-    >
-      Prev
-    </span>
-
-    <!-- Page Numbers with Ellipsis -->
-    <template v-for="i in visiblePages" :key="i">
-      <span 
-        v-if="i === '...'" 
-        class="px-3 py-2 text-gray-500"
-      >
-        ...
-      </span>
-      <Link 
-        v-else 
-        :href="`/posts?page=${i}`" 
-        :class="[ 
-          'px-4 py-2 rounded-md transition',
-          i === posts.current_page 
-            ? 'font-bold text-white bg-blue-500' 
-            : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
-        ]"
-      >
-        {{ i }}
-      </Link>
-    </template>
-
-    <!-- Next Page -->
-    <Link 
-      v-if="posts.next_page_url" 
-      :href="posts.next_page_url" 
-      class="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition"
-    >
-      Next
-    </Link>
-    <span 
-      v-else 
-      class="px-4 py-2 text-gray-400 bg-gray-100 rounded-md cursor-not-allowed"
-    >
-      Next
-    </span>
-
-  </div>
-</div>
-
-  </AppLayout>
-</template>
 <script setup>
-import { ref } from "vue";
-import { computed } from "vue";
-import { Link, router , usePage} from "@inertiajs/vue3";
+import { ref, computed } from "vue";
+import { Link, router, usePage } from "@inertiajs/vue3";
 import axios from "axios";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import ViewPostButton from "@/Components/ViewPostButton.vue";
-import { route } from "ziggy-js";
 
 const props = defineProps({
   posts: Object
 });
+
 const page = usePage();
 
+// ✅ Safely retrieve the success message (prevents "undefined" error)
+const successMessage = computed(() => page.props.flash?.success || null);
 
 // Function to handle post deletion
 const deletePost = async (id) => {
   if (confirm("Are you sure you want to delete this post?")) {
     try {
       await axios.delete(`/posts/${id}`);
-      router.reload(); // ✅ More efficient than window.location.reload()
+      router.reload();
     } catch (error) {
       console.error("Error deleting post:", error);
     }
@@ -162,11 +30,13 @@ const deletePost = async (id) => {
 const restorePost = async (id) => {
   try {
     await axios.patch(`/posts/${id}/restore`);
-    router.reload(); // ✅ More efficient than window.location.reload()
+    router.reload();
   } catch (error) {
     console.error("Error restoring post:", error);
   }
 };
+
+// Pagination logic
 const visiblePages = computed(() => {
   const totalPages = props.posts.last_page;
   const currentPage = props.posts.current_page;
@@ -192,5 +62,133 @@ const visiblePages = computed(() => {
   pages.push(totalPages);
   return pages;
 });
-
 </script>
+
+<template>
+  <AppLayout>
+    <!-- Success message alert -->
+    <div v-if="successMessage" class="p-4 mb-4 text-green-800 bg-green-100 border border-green-400 rounded">
+      {{ successMessage }}
+    </div>
+
+    <!-- Create Post Button -->
+    <div class="text-center">
+      <Link 
+        href="/posts/create"
+        class="mt-4 px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition"
+      >
+        Create Post
+      </Link>
+    </div>
+
+    <!-- Posts Table -->
+    <div class="mt-6 rounded-lg border border-gray-200 shadow-md bg-white p-4">
+      <div class="overflow-x-auto rounded-t-lg">
+        <table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
+          <thead class="text-left bg-gray-100">
+            <tr>
+              <th class="px-4 py-2 font-medium text-gray-900">#</th>
+              <th class="px-4 py-2 font-medium text-gray-900">Title</th>
+              <th class="px-4 py-2 font-medium text-gray-900">Slug</th> <!-- Slug Column -->
+              <th class="px-4 py-2 font-medium text-gray-900">Posted By</th>
+              <th class="px-4 py-2 font-medium text-gray-900">Created At</th>
+              <th class="px-4 py-2 font-medium text-gray-900">Image</th> <!-- Image Column -->
+              <th class="px-4 py-2 font-medium text-gray-900">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr v-for="post in posts.data" :key="post.id" :class="post.deleted_at ? 'bg-red-100' : ''">
+              <td class="px-4 py-2 font-medium text-gray-900">{{ post.id }}</td>
+              <td class="px-4 py-2 text-gray-700">{{ post.title }}</td>
+              <td class="px-4 py-2 text-gray-700">{{ post.slug || 'No Slug Available' }}</td> 
+              <td class="px-4 py-2 text-gray-700">{{ post.user ? post.user.name : 'No User Found' }}</td>
+              <td class="px-4 py-2 text-gray-700">{{ post.formatted_date }}</td>
+
+              <!-- Display Image -->
+              <td class="px-4 py-2 text-gray-700">
+                <div v-if="post.image_url">
+                  <img :src="post.image_url" alt="Post Image" class="h-20 w-auto object-cover rounded">
+                </div>
+                <div v-else>No Image</div>
+              </td>
+
+              <td class="px-4 py-2 text-gray-700 space-x-2 flex items-center">
+                <Link 
+                  :href="`/posts/${post.id}`" 
+                  class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition"
+                >
+                  Show
+                </Link>
+                <ViewPostButton :postId="post.id" />
+                <Link 
+                  :href="`/posts/${post.id}/edit`" 
+                  class="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 transition"
+                >
+                  Edit
+                </Link>
+                <button 
+                  v-if="post.deleted_at" 
+                  @click="restorePost(post.id)" 
+                  class="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition"
+                >
+                  Restore
+                </button>
+                <button 
+                  v-else 
+                  @click="deletePost(post.id)" 
+                  class="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-6 flex justify-center p-4 border-t border-gray-200">
+      <div class="flex items-center space-x-1 overflow-x-auto">
+        <Link 
+          v-if="posts.prev_page_url" 
+          :href="posts.prev_page_url" 
+          class="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition"
+        >
+          Prev
+        </Link>
+        <span v-else class="px-4 py-2 text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">
+          Prev
+        </span>
+
+        <template v-for="i in visiblePages" :key="i">
+          <span v-if="i === '...'" class="px-3 py-2 text-gray-500"> ... </span>
+          <Link 
+            v-else 
+            :href="`/posts?page=${i}`" 
+            :class="[ 
+              'px-4 py-2 rounded-md transition',
+              i === posts.current_page 
+                ? 'font-bold text-white bg-blue-500' 
+                : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
+            ]"
+          >
+            {{ i }}
+          </Link>
+        </template>
+
+        <Link 
+          v-if="posts.next_page_url" 
+          :href="posts.next_page_url" 
+          class="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition"
+        >
+          Next
+        </Link>
+        <span v-else class="px-4 py-2 text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">
+          Next
+        </span>
+      </div>
+    </div>
+  </AppLayout>
+</template>
+

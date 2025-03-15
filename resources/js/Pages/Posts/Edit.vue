@@ -1,6 +1,7 @@
 <script setup>
 import { useForm } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
+import { ref } from 'vue';
 
 const props = defineProps({
   post: Object,
@@ -11,11 +12,26 @@ const form = useForm({
   title: props.post.title,
   description: props.post.description,
   user_id: props.post.user_id,
+  image: null, // Add this line for image upload
+  _method: 'PUT', // Add this for method spoofing
 });
 
+const imagePreview = ref(props.post.image_url);
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    form.image = file;
+    imagePreview.value = URL.createObjectURL(file);
+  }
+};
+
 const submit = () => {
-  form.put(route("posts.update", props.post.id), {
-    onSuccess: () => form.reset(), // Reset form after successful update
+  form.post(route("posts.update", props.post.id), {
+    forceFormData: true,
+    onSuccess: () => {
+      // Success handling
+    },
   });
 };
 </script>
@@ -29,7 +45,7 @@ const submit = () => {
         </div>
 
         <div class="px-6 py-4">
-          <form @submit.prevent="submit">
+          <form @submit.prevent="submit" enctype="multipart/form-data">
             <!-- Title -->
             <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
             <input 
@@ -63,6 +79,23 @@ const submit = () => {
               </option>
             </select>
 
+            <!-- Image Upload -->
+            <div class="mt-4">
+              <label for="image" class="block text-sm font-medium text-gray-700">Post Image</label>
+              <input 
+                type="file" 
+                id="image" 
+                @change="handleFileChange"
+                accept="image/*"
+                class="mt-1 p-2 w-full border rounded"
+              />
+              
+              <!-- Image Preview -->
+              <div v-if="imagePreview" class="mt-2">
+                <img :src="imagePreview" alt="Post Image Preview" class="max-w-xs rounded-md" />
+              </div>
+            </div>
+
             <!-- Submit Button -->
             <div class="flex justify-center">
               <button 
@@ -79,3 +112,4 @@ const submit = () => {
     </div>
   </AppLayout>
 </template>
+
