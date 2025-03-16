@@ -139,14 +139,11 @@
 import { computed, ref } from "vue";
 import { usePage, router } from "@inertiajs/vue3";
 
-// Get post data from Inertia props
 const page = usePage();
 const post = computed(() => page.props.post);
 
-// New comment input
 const newComment = ref("");
 
-// Format date function
 const formattedDate = (dateString) => {
   if (!dateString) return "Unknown date";
   return new Date(dateString).toLocaleDateString("en-US", {
@@ -156,7 +153,6 @@ const formattedDate = (dateString) => {
   });
 };
 
-// Add new comment function
 const addComment = () => {
   if (!newComment.value.trim()) return;
 
@@ -167,12 +163,10 @@ const addComment = () => {
   });
 };
 
-// Delete comment function
 const deleteComment = (commentId) => {
   router.delete(`/comments/${commentId}`);
 };
 
-// Back button function
 const goBack = () => {
   router.visit("/posts");
 };

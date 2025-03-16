@@ -7,14 +7,14 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->softDeletes(); // Adds the 'deleted_at' column
+            $table->softDeletes();
         });
     }
 
     public function down()
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->dropSoftDeletes(); // Removes the 'deleted_at' column if rolled back
+            $table->dropSoftDeletes();
         });
     }
 };

@@ -3,12 +3,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 
 const redirectToPosts = () => {
-    window.location.href = route('posts.index'); // Ensure 'posts.index' exists in web.php
+    window.location.href = route('posts.index');
 };
 </script>
 
 <template>
-    <div> <!-- Wrap everything inside a single root element -->
+    <div>
         <Head title="Dashboard" />
 
         <AuthenticatedLayout>

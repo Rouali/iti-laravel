@@ -12,8 +12,8 @@ const form = useForm({
   title: props.post.title,
   description: props.post.description,
   user_id: props.post.user_id,
-  image: null, // Add this line for image upload
-  _method: 'PUT', // Add this for method spoofing
+  image: null, 
+  _method: 'PUT',
 });
 
 const imagePreview = ref(props.post.image_url);
@@ -30,7 +30,6 @@ const submit = () => {
   form.post(route("posts.update", props.post.id), {
     forceFormData: true,
     onSuccess: () => {
-      // Success handling
     },
   });
 };

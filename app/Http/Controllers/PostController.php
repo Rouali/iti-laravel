@@ -73,31 +73,25 @@ class PostController extends Controller
                 'title' => 'required|string|min:3',
                 'description' => 'required|string|min:10',
                 'user_id' => 'required|exists:users,id',
-                'image' => 'nullable|image|max:2048', // Ensure this validates an image
+                'image' => 'nullable|image|max:2048',
             ]);
             
-            // Create a new post
             $post = new Post();
             $post->title = $validated['title'];
             $post->description = $validated['description'];
-            $post->user_id = $validated['user_id']; // Make sure to set the user_id
+            $post->user_id = $validated['user_id'];
             $post->slug = Str::slug($validated['title']);
             
-            // Handle image upload
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('images', 'public');
                 $post->image = $imagePath;
             }
             
-            // Save the post
             $post->save();
             
             return redirect()->route('posts.index')->with('success', 'Post created successfully!');
         } catch (\Exception $e) {
-            // Log the error for debugging
             Log::error('Error creating post: ' . $e->getMessage());
-            
-            // Return a response with the error
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -105,44 +99,31 @@ class PostController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            // Find the existing post
             $post = Post::findOrFail($id);
-
-            // Validate incoming request data
             $validated = $request->validate([
                 'title' => 'required|string|min:3',
                 'description' => 'required|string|min:10',
                 'user_id' => 'required|exists:users,id',
-                'image' => 'nullable|image|max:2048', // Validate image: optional, must be a valid image, max size 2MB
+                'image' => 'nullable|image|max:2048',
             ]);
-
-            // Update the post's title, description, and slug
             $post->title = $validated['title'];
             $post->description = $validated['description'];
-            $post->user_id = $validated['user_id']; // Make sure user_id is updated
+            $post->user_id = $validated['user_id'];
             $post->slug = Str::slug($validated['title']);
 
-            // Handle image upload: delete old image if a new one is uploaded
             if ($request->hasFile('image')) {
-                // Delete the old image if one exists
                 if ($post->image) {
                     Storage::disk('public')->delete($post->image);
                 }
-
-                // Store the new image and get its path
                 $imagePath = $request->file('image')->store('images', 'public');
                 $post->image = $imagePath;
             }
 
-            // Save updated post
             $post->save();
 
             return redirect()->route('posts.index')->with('success', 'Post updated successfully!');
         } catch (\Exception $e) {
-            // Log the error for debugging
             Log::error('Error updating post: ' . $e->getMessage());
-            
-            // Return a response with the error
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -150,17 +131,13 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         try {
-            // Remove the old image before deleting the post
             $post->deleteOldImage();
             
             $post->delete();
             
             return redirect()->route('posts.index')->with('success', 'Post deleted successfully!');
         } catch (\Exception $e) {
-            // Log the error for debugging
             Log::error('Error deleting post: ' . $e->getMessage());
-            
-            // Return a response with the error
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -184,10 +161,7 @@ class PostController extends Controller
                 'restored_at' => now()
             ]);
         } catch (\Exception $e) {
-            // Log the error for debugging
             Log::error('Error restoring post: ' . $e->getMessage());
-            
-            // Return a response with the error
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

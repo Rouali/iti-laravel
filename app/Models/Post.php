@@ -45,20 +45,10 @@ class Post extends Model
         return [
             'slug' => [
                 'source' => 'title',
-                'onUpdate' => true,  // Update slug when the title changes
+                'onUpdate' => true,
             ]
         ];
     }
-
-   // Inside the Post model, setImageAttribute method
-// Remove this method as it's handled in the controller
-// public function setImageAttribute($value)
-// {
-//     if ($value) {
-//         $imagePath = $value->store('images', 'public');
-//         $this->attributes['image'] = $imagePath;
-//     }
-// }
 public function deleteOldImage()
 {
     if ($this->image) {

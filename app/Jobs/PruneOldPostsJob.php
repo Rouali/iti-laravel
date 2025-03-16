@@ -28,22 +28,16 @@ class PruneOldPostsJob implements ShouldQueue
      */
     public function handle(): void
     {
-        // Calculate the date 2 years ago
         $twoYearsAgo = Carbon::now()->subYears(2);
-        
-        // Get posts older than 2 years
+
         $oldPosts = Post::where('created_at', '<', $twoYearsAgo)->get();
-        
-        // Log how many posts will be deleted
+
         $count = $oldPosts->count();
         Log::info("PruneOldPostsJob: Found {$count} posts older than 2 years to delete");
         
-        // Delete each post (this will properly handle image deletion through the model's events)
         foreach ($oldPosts as $post) {
-            // Delete the post's image if it exists
             $post->deleteOldImage();
-            
-            // Delete the post
+
             $post->delete();
             
             Log::info("PruneOldPostsJob: Deleted post ID {$post->id}: {$post->title}");

@@ -9,7 +9,7 @@ class UpdatePostRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Change to authorization logic if needed
+        return true;
     }
 
     public function rules(): array
@@ -19,7 +19,7 @@ class UpdatePostRequest extends FormRequest
                 'required', 
                 'string', 
                 'min:3', 
-                Rule::unique('posts', 'title')->ignore($this->route('post')), // Allows updating without requiring a new unique title
+                Rule::unique('posts', 'title')->ignore($this->route('post')),
             ],
             'description' => 'required|string|min:10',
             'user_id' => 'required|exists:users,id',

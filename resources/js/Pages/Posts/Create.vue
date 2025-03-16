@@ -6,10 +6,9 @@ import { router } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import axios from "axios";
 
-// Props (Users List & CSRF Token)
 const props = defineProps({
   users: Array,
-  csrf_token: String, // Get CSRF token from Laravel
+  csrf_token: String, 
 });
 
 // Validation Schema
@@ -20,7 +19,6 @@ const schema = yup.object({
   image: yup.mixed().nullable().test('fileSize', 'The file is too large', (value) => !value || value.size <= 2048 * 1024).test('fileType', 'The file must be an image', (value) => !value || ['image/jpeg', 'image/png'].includes(value.type)),
 });
 
-// Form Setup
 const { handleSubmit, errors, resetForm } = useVeeForm({ validationSchema: schema });
 const { value: title, errorMessage: titleError } = useField("title");
 const { value: description, errorMessage: descriptionError } = useField("description");
@@ -29,29 +27,25 @@ const { value: image, errorMessage: imageError } = useField("image");
 
 const imageUrl = ref(null);
 
-// Handle file change for image
 const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
     image.value = file;
-    imageUrl.value = URL.createObjectURL(file); // Set image preview
+    imageUrl.value = URL.createObjectURL(file);
   }
 };
 
-// Form Submission
 const submit = handleSubmit(async (values) => {
   try {
     const formData = new FormData();
     formData.append('title', values.title);
     formData.append('description', values.description);
     formData.append('user_id', values.user_id);
-    
-    // Only append image if it exists
+
     if (image.value) {
       formData.append('image', image.value);
     }
-    
-    // Add CSRF token to headers
+
     const headers = {
       'Content-Type': 'multipart/form-data',
       'X-CSRF-TOKEN': props.csrf_token
@@ -155,7 +149,6 @@ const submit = handleSubmit(async (values) => {
 </template>
 
 <style scoped>
-/* Optional styles to improve form appearance or customization */
 input, select, textarea {
   transition: border-color 0.3s ease;
 }

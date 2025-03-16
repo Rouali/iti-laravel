@@ -8,7 +8,7 @@ class StorePostRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Change to authorization logic if needed
+        return true;
     }
 
     public function rules(): array
@@ -16,7 +16,7 @@ class StorePostRequest extends FormRequest
         return [
             'title' => 'required|string|min:3|unique:posts,title',
             'description' => 'required|string|min:10',
-            'user_id' => 'required|exists:users,id', // Prevents fake user IDs
+            'user_id' => 'required|exists:users,id',
         ];
     }
 

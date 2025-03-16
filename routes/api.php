@@ -9,12 +9,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-Route::post('/login', [AuthenticatedSessionController::class, 'store']); // For logging in and getting the token.
+Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 
-
-// Public API Routes
-
-// Protected API Routes (Require authentication)
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{id}', [PostController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
@@ -23,11 +19,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/posts/{id}', [PostController::class, 'destroy']);
     Route::patch('/posts/{id}/restore', [PostController::class, 'restore']);
 
-    // Comments API
+
     Route::post('/posts/{post}/comments', [CommentController::class, 'store']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
 
-    // Authenticated User Data
+
     Route::get('/user', function (Request $request) {
         return $request->user();
     });

@@ -13,7 +13,6 @@ return new class extends Migration
      */
     public function up()
     {
-        // Update existing posts to generate slugs
         Post::all()->each(function ($post) {
             if (empty($post->slug)) {
                 $post->slug = Str::slug($post->title);
@@ -24,6 +23,6 @@ return new class extends Migration
 
     public function down()
     {
-        // Optionally, add logic to revert changes (e.g., set slugs to null)
+
     }
 };

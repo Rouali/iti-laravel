@@ -12,7 +12,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->string('image')->nullable(); // Make it nullable if not every post has an image
+            $table->string('image')->nullable();
         });
     }
     

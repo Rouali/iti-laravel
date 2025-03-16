@@ -3,7 +3,7 @@ import { ref, computed } from "vue";
 import { Link, router, usePage } from "@inertiajs/vue3";
 import axios from "axios";
 import AppLayout from "@/Layouts/AppLayout.vue";
-import ViewPostButton from "@/Components/ViewPostButton.vue";
+// import ViewPostButton from "@/Components/ViewPostButton.vue";
 
 const props = defineProps({
   posts: Object
@@ -11,10 +11,8 @@ const props = defineProps({
 
 const page = usePage();
 
-// ✅ Safely retrieve the success message (prevents "undefined" error)
 const successMessage = computed(() => page.props.flash?.success || null);
 
-// Function to handle post deletion
 const deletePost = async (id) => {
   if (confirm("Are you sure you want to delete this post?")) {
     try {
@@ -26,7 +24,6 @@ const deletePost = async (id) => {
   }
 };
 
-// Function to handle post restoration
 const restorePost = async (id) => {
   try {
     await axios.patch(`/posts/${id}/restore`);
@@ -36,7 +33,6 @@ const restorePost = async (id) => {
   }
 };
 
-// Pagination logic
 const visiblePages = computed(() => {
   const totalPages = props.posts.last_page;
   const currentPage = props.posts.current_page;
@@ -66,10 +62,6 @@ const visiblePages = computed(() => {
 
 <template>
   <AppLayout>
-    <!-- Success message alert -->
-    <div v-if="successMessage" class="p-4 mb-4 text-green-800 bg-green-100 border border-green-400 rounded">
-      {{ successMessage }}
-    </div>
 
     <!-- Create Post Button -->
     <div class="text-center">
@@ -89,10 +81,10 @@ const visiblePages = computed(() => {
             <tr>
               <th class="px-4 py-2 font-medium text-gray-900">#</th>
               <th class="px-4 py-2 font-medium text-gray-900">Title</th>
-              <th class="px-4 py-2 font-medium text-gray-900">Slug</th> <!-- Slug Column -->
+              <th class="px-4 py-2 font-medium text-gray-900">Slug</th> 
               <th class="px-4 py-2 font-medium text-gray-900">Posted By</th>
               <th class="px-4 py-2 font-medium text-gray-900">Created At</th>
-              <th class="px-4 py-2 font-medium text-gray-900">Image</th> <!-- Image Column -->
+              <th class="px-4 py-2 font-medium text-gray-900">Image</th>
               <th class="px-4 py-2 font-medium text-gray-900">Actions</th>
             </tr>
           </thead>

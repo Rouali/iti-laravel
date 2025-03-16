@@ -18,7 +18,6 @@ class User extends Authenticatable
         'password',
     ];
 
-    // Automatically hash the password when setting it
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] = Hash::make($value);
